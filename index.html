@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+</head>
+<body>
+    <h1 class="flex justify-center text-2xl font-bold py-9">Write the correct word</h1>
+
+    <div
+        x-data="
+        { 
+            inputValue: '',
+            words: [],
+            selectedWord: '',
+            unorderedSelectedWordArray: [],
+            selectingWordFunction: function(words) {
+                this.selectedWord = words[Math.floor(Math.random() * words.length)]
+                this.unorderedSelectedWordArray = this.selectedWord.split('').sort(() => Math.random() - 0.5)
+            },
+            showWords: false,
+        }"
+        
+        x-init="words = await (await fetch('https://api.generadordni.es/v2/text/words?words=1&language=en')).json(), selectingWordFunction(words)"
+    >
+
+
+
+        <div class="flex gap-12 justify-center py-9">
+            <template x-for="word in unorderedSelectedWordArray">
+                <p x-text="word" class="text-2xl px-5 py-4 bg-red-300 rounded-lg"></p>
+            </template>
+        </div>
+
+        <div class="flex py-9 justify-center gap-4" @check="inputValue == selectedWord ? alert('Correct!') : alert('Incorrect!')">
+            <input 
+                x-model="inputValue"
+                type="text"
+                placeholder="Write the word..."
+                class="border w-96 rounded-lg p-3"
+            >
+
+            <button @click="$dispatch('check')" class="text-green-500 text-2xl"><i class="fa-solid fa-check"></i></button>
+            <button @click="words.push(inputValue), inputValue = ''" class="text-blue-500 text-2xl"><i class="fa-solid fa-plus"></i></button>
+            <button @click="selectingWordFunction(words)" class="text-gray-500 text-2xl"><i class="fa-solid fa-dice"></i></button>
+            <button @click="showWords = !showWords" class="text-2xl"><i class="fa-solid fa-eye"></i></button>
+        </div>
+
+        <div x-show="showWords" class="grid justify-center py-9 gap-2">
+            <template x-for="word in words">
+                <p x-text="word" class="text-2xl p-2 bg-blue-200 rounded-lg text-center"></p>
+            </template>
+        </div>
+     
+    </div>
+</body>
+</html>
